@@ -4,21 +4,25 @@
 #include <WiFiManager.h> 
 #include <SoftwareSerial.h>
 #include <DallasTemperature.h>
-#include "Arduino.h"
-#include "SoftwareSerial.h"
-#include "DFRobotDFPlayerMini.h"
+#include <DFRobotDFPlayerMini.h>
+DFRobotDFPlayerMini player;
 
 // Set-up Pin (Gunakan define alih-alih const!)
-#define RX_DF 25
-#define TX_DF 26
-#define BUTTON_PIN 27
-#define TEMP_PIN 32
+#define RX_DF 17
+#define TX_DF 16
+#define BUTTON_PIN 13
+#define TEMP_PIN 12
 
 // inisialisasi Libraries
-SoftwareSerial DFPlayerSerial(RX_DF, TX_DF); // Inisialisasi DFPlayer
+SoftwareSerial dfPlayer(RX_DF, TX_DF); // Inisialisasi DFPlayer
 DFRobotDFPlayerMini myDFPlayer;
 OneWire oneWire(TEMP_PIN); // Inisialisasi DS18B20
 DallasTemperature suhu(&oneWire);
+
+// Inisialisasi Variable
+#define interval = 1000;        // Interval dalam milidetik (misalnya, 1000ms = 1 detik)
+unsigned long previousMillis = 0;  // Waktu sebelumnya yang disimpan
+bool pressed = false; 
 
 // ============ FUNGSI / HELPER ============
 void connectWiFi(){
@@ -36,17 +40,15 @@ void connectWiFi(){
 }
 
 void init_df(){
-  DFPlayerSerial.begin(9600);
+  dfPlayer.begin(9600);
+  Serial.println(F("Menyiapkan DFPlayer ... (3~5 Detik)"));
+  player.begin(dfPlayer);
 
-  Serial.println(F("Initializing DFPlayer ... (May take 3~5 seconds)"));
-  
-  if (!myDFPlayer.begin(DFPlayerSerial)) {  // Komunikasi dengan DFPlayer
-    Serial.println(F("DFPlayer Gagal Terhubung!"));
-    while(true){
-      delay(0);
+    if (player.begin(dfPlayer)) {
+        Serial.println(F("DFMini Player Terhubung!"));
+    } else {
+        Serial.println(F("DFMini Player Gagal Terhubung!"));
     }
-  }
-  
 }
 
 void init_serial(){
@@ -57,8 +59,25 @@ void init_suhu(){
   suhu.begin();
 }
 
+void cek_button() {
+  bool buttonState = digitalRead(BUTTON_PIN);
+
+  // Jika Tombol ditekan
+  if(buttonState == pressed){
+    player.begin(dfPlayer);
+    
+    if (player.begin(dfPlayer)) {
+        player.volume(30);
+        player.play(1);
+        Serial.println(F("Voice Note 1 Diputar!"));
+    } else {
+        Serial.println(F("DFMini Player Gagal Diputar!"));
+    }
+  }
+}
+
 float getSuhu() {
-  Serial.print("Requesting temperatures...");
+  Serial.print("Suhu Saat ini: ");
   suhu.requestTemperatures(); // Send the command to get temperatures
   return suhu.getTempCByIndex(0);
 }
@@ -71,6 +90,8 @@ void sendToServer(){
 
 void setup() {
   // PROGRAM SEKALI JALAN
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+   
   init_serial();
   connectWiFi();
   init_df();
@@ -78,8 +99,18 @@ void setup() {
 }
 
 void loop() {
-  // PROGRAM YANG BERULANG SELAMANYA (GUNAKAN FUNCTION)
-  getSuhu();
+  unsigned long currentMillis = millis();  // Waktu saat ini
+  
+  // Periksa apakah sudah waktunya untuk melakukan sesuatu berdasarkan interval
+  if (currentMillis - previousMillis >= interval) {
+    // Simpan waktu terbaru
+    previousMillis = currentMillis;
+
+    // Kode yang ingin Anda jalankan setiap interval tertentu
+    Serial.println(getSuhu());
+  } else {
+    cek_button();
+  }
 }
 
 
