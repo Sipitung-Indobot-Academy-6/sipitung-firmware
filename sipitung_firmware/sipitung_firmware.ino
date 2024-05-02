@@ -11,10 +11,10 @@ DFRobotDFPlayerMini player;
 #define RX_DF 17
 #define TX_DF 16
 #define BUTTON_PIN 15
-#define TEMP_PIN 12
+#define TEMP_PIN 14
 
 // inisialisasi Libraries
-SoftwareSerial dfPlayer(RX_DF, TX_DF); // Inisialisasi DFPlayer
+SoftwareSerial dfPlayer(TX_DF, RX_DF); // Inisialisasi DFPlayer
 DFRobotDFPlayerMini myDFPlayer;
 OneWire oneWire(TEMP_PIN); // Inisialisasi DS18B20
 DallasTemperature suhu(&oneWire);
