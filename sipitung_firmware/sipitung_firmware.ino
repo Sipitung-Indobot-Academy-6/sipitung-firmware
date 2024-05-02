@@ -10,7 +10,7 @@ DFRobotDFPlayerMini player;
 // Set-up Pin (Gunakan define alih-alih const!)
 #define RX_DF 17
 #define TX_DF 16
-#define BUTTON_PIN 13
+#define BUTTON_PIN 15
 #define TEMP_PIN 12
 
 // inisialisasi Libraries
@@ -20,7 +20,7 @@ OneWire oneWire(TEMP_PIN); // Inisialisasi DS18B20
 DallasTemperature suhu(&oneWire);
 
 // Inisialisasi Variable
-#define interval = 1000;        // Interval dalam milidetik (misalnya, 1000ms = 1 detik)
+const int interval = 1000;        // Interval dalam milidetik (misalnya, 1000ms = 1 detik)
 unsigned long previousMillis = 0;  // Waktu sebelumnya yang disimpan
 bool pressed = false; 
 
