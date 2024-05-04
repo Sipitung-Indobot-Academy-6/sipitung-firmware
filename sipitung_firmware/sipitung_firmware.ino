@@ -4,6 +4,7 @@
 #include <WiFiManager.h> 
 #include <SoftwareSerial.h>
 #include <DallasTemperature.h>
+#include <BlynkSimpleEthernet.h>
 #include <DFRobotDFPlayerMini.h>
 DFRobotDFPlayerMini player;
 
@@ -12,6 +13,12 @@ DFRobotDFPlayerMini player;
 #define TX_DF 16
 #define BUTTON_PIN 15
 #define TEMP_PIN 14
+
+// Set-Up Blynk
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID           "TMPL6qNAr_Dl-"
+#define BLYNK_TEMPLATE_NAME         "Sipitung Blynk"
+#define BLYNK_AUTH_TOKEN            "2Z0UmnxLQr3dRouPx6HggDjWu9LEonTM"
 
 // inisialisasi Libraries
 SoftwareSerial dfPlayer(TX_DF, RX_DF); // Inisialisasi DFPlayer
@@ -86,11 +93,18 @@ void sendToServer(){
   
 }
 
+// Function Untuk Mendapatkan Value VirtualPin
+void getVirtualValue(){
+  
+}
+
 // ============= PROGRAM UTAMA ============
 
 void setup() {
   // PROGRAM SEKALI JALAN
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  Blynk.begin(BLYNK_AUTH_TOKEN);
    
   init_serial();
   connectWiFi();
@@ -99,6 +113,8 @@ void setup() {
 }
 
 void loop() {
+  Blynk.run();
+  
   unsigned long currentMillis = millis();  // Waktu saat ini
   
   // Periksa apakah sudah waktunya untuk melakukan sesuatu berdasarkan interval
