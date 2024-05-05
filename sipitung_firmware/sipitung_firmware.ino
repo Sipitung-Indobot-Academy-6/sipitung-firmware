@@ -1,12 +1,14 @@
 // Inisialisasi Libraries(Gunakan depedency yang diperlukan)
 #include <WiFi.h>
 #include <OneWire.h>
+#include <HTTPClient.h>
 #include <WiFiManager.h> 
 #include <SoftwareSerial.h>
 #include <DallasTemperature.h>
 #include <BlynkSimpleEthernet.h>
 #include <DFRobotDFPlayerMini.h>
 DFRobotDFPlayerMini player;
+WiFiClient client;
 
 // Set-up Pin (Gunakan define alih-alih const!)
 #define RX_DF 17
@@ -89,8 +91,39 @@ float getSuhu() {
   return suhu.getTempCByIndex(0);
 }
 
-void sendToServer(){ 
-  
+String sendToServer(){ 
+    // Inisialisasi 
+    HTTPClient http;
+    String postData, pelanggan, suhu, kelembapan, link, res;
+
+    suhu = String(getSuhu());
+    kelembapan = String(0);
+    pelanggan = "B";
+
+    // Pengiriman Data via POST Method
+    postData = "&status1=" + suhu + "&status2=" + kelembapan + "&pelanggan=" + pelanggan;
+    link = "http://panicbutton.my.id/view/suhu/konek.php";
+
+    http.begin(client, link);                                            // Specify request destination
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded"); // Specify content-type header
+
+    int httpCode = http.POST(postData); // Kirim Request sekaligus mendapatkan Res Code
+    String payload = http.getString();  // Mendapatkan Catatan Respons
+
+    // Memastikan Hasil Response 
+    if (httpCode == 200) {
+        res = "Data Berhasil Dikirim!";
+    } else {
+        res = "Data Gagal Terkirim! Error log : \n";
+        res += "[";
+        res += String(httpCode);
+        res += "] ";
+        res += payload;
+    }
+    
+    http.end(); // Tutup Koneksi
+
+    return res;
 }
 
 // Function Untuk Mendapatkan Value VirtualPin
@@ -113,30 +146,33 @@ void setup() {
 }
 
 void loop() {
+  // Jalankan program Blynk
   Blynk.run();
-  
-  unsigned long currentMillis = millis();  // Waktu saat ini
+
+  // Jalankan program Button (Mode Standby)
+  cek_button();
+
+  // Setting Waktu Saat ini
+  unsigned long currentMillis = millis();
   
   // Periksa apakah sudah waktunya untuk melakukan sesuatu berdasarkan interval
   if (currentMillis - previousMillis >= interval) {
     // Simpan waktu terbaru
     previousMillis = currentMillis;
 
-    // Kode yang ingin Anda jalankan setiap interval tertentu
-    Serial.println(getSuhu());
-  } else {
-    cek_button();
-  }
+    // Kirim ke Server
+    sendToServer();
+  } 
 }
 
 
 /* Projek ini menggunakan ESP32 Devkit V3 (Huge App Mode) Sebagai Mikrokontroller
- * Ukuran Program : 783.381 / 3.145.728 bytes (24%)
- * Penggunaan Variable Global : 38.648 / 327.680 bytes (11%)
- * Terakhir diupdate : - (Sedang sering diutak atik hehe)
+ * Ukuran Program : 814.693 / 3.145.728 bytes (25%)
+ * Penggunaan Variable Global : 39.332 / 327.680 bytes (12%)
+ * Terakhir diupdate : 5 Mei 2024 14:44 WIB (Sedang sering diutak atik hehe)
  *
  * Kode ini digunakan untuk:
- * Inovasi Sistem Keamanan Desa Berbasis Internet Of Things
- * Coded by SIPITUNG
+ * Sistem Panic Button untuk Kampung (SIPITUNG) : Inovasi Sistem Keamanan Desa Berbasis Internet Of Things
+ * Coded by SIPITUNG TEAM
  * Copyright 2024
 */
