@@ -5,7 +5,6 @@
 #include <WiFiManager.h> 
 #include <SoftwareSerial.h>
 #include <DallasTemperature.h>
-#include <BlynkSimpleEthernet.h>
 #include <DFRobotDFPlayerMini.h>
 DFRobotDFPlayerMini player;
 WiFiClient client;
@@ -21,6 +20,7 @@ WiFiClient client;
 #define BLYNK_TEMPLATE_ID           "TMPL6qNAr_Dl-"
 #define BLYNK_TEMPLATE_NAME         "Sipitung Blynk"
 #define BLYNK_AUTH_TOKEN            "2Z0UmnxLQr3dRouPx6HggDjWu9LEonTM"
+#include <BlynkSimpleEthernet.h>
 
 // inisialisasi Libraries
 SoftwareSerial dfPlayer(TX_DF, RX_DF); // Inisialisasi DFPlayer
@@ -29,8 +29,8 @@ OneWire oneWire(TEMP_PIN); // Inisialisasi DS18B20
 DallasTemperature suhu(&oneWire);
 
 // Inisialisasi Variable
-const int interval = 1000;        // Interval dalam milidetik (misalnya, 1000ms = 1 detik)
-unsigned long previousMillis = 0;  // Waktu sebelumnya yang disimpan
+const short interval PROGMEM = 1000;        // Interval dalam milidetik (misalnya, 1000ms = 1 detik)
+unsigned long previousMillis PROGMEM = 0;  // Waktu sebelumnya yang disimpan
 bool pressed = false; 
 
 // ============ FUNGSI / HELPER ============
@@ -146,6 +146,9 @@ void setup() {
 }
 
 void loop() {
+  // Membiarkan program lain berjalan terlebih dahulu ketika terjadi crash
+  yield(); 
+  
   // Jalankan program Blynk
   Blynk.run();
 
@@ -153,7 +156,7 @@ void loop() {
   cek_button();
 
   // Setting Waktu Saat ini
-  unsigned long currentMillis = millis();
+  unsigned long currentMillis PROGMEM = millis();
   
   // Periksa apakah sudah waktunya untuk melakukan sesuatu berdasarkan interval
   if (currentMillis - previousMillis >= interval) {
