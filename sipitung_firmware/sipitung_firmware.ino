@@ -10,17 +10,17 @@ DFRobotDFPlayerMini player;
 WiFiClient client;
 
 // Set-up Pin (Gunakan define alih-alih const!)
-#define RX_DF 17
-#define TX_DF 16
+#define RX_DF 16
+#define TX_DF 17
 #define BUTTON_PIN 15
 #define TEMP_PIN 14
 
-// Set-Up Blynk
-#define BLYNK_PRINT Serial
-#define BLYNK_TEMPLATE_ID           "TMPL6qNAr_Dl-"
-#define BLYNK_TEMPLATE_NAME         "Sipitung Blynk"
-#define BLYNK_AUTH_TOKEN            "2Z0UmnxLQr3dRouPx6HggDjWu9LEonTM"
-#include <BlynkSimpleEthernet.h>
+//// Set-Up Blynk
+//#define BLYNK_PRINT Serial
+//#define BLYNK_TEMPLATE_ID           "TMPL6qNAr_Dl-"
+//#define BLYNK_TEMPLATE_NAME         "Sipitung Blynk"
+//#define BLYNK_AUTH_TOKEN            "2Z0UmnxLQr3dRouPx6HggDjWu9LEonTM"
+//#include <BlynkSimpleEthernet.h>
 
 // inisialisasi Libraries
 SoftwareSerial dfPlayer(TX_DF, RX_DF); // Inisialisasi DFPlayer
@@ -38,7 +38,7 @@ void connectWiFi(){
    WiFiManager wm;
 
     bool res;
-    res = wm.autoConnect("Sipitung","selaluaman"); 
+    res = wm.autoConnect("Sipitung","terserah"); 
     
     if(!res) {
         Serial.println("Gagal Terhubung");
@@ -99,10 +99,11 @@ String sendToServer(){
     suhu = String(getSuhu());
     kelembapan = String(0);
     pelanggan = "B";
+    Serial.println(suhu);
 
     // Pengiriman Data via POST Method
     postData = "&status1=" + suhu + "&status2=" + kelembapan + "&pelanggan=" + pelanggan;
-    link = "http://panicbutton.my.id/view/suhu/konek.php";
+    link = "https://panicbutton.my.id/view/suhu/konek.php";
 
     http.begin(client, link);                                            // Specify request destination
     http.addHeader("Content-Type", "application/x-www-form-urlencoded"); // Specify content-type header
@@ -137,7 +138,7 @@ void setup() {
   // PROGRAM SEKALI JALAN
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-  Blynk.begin(BLYNK_AUTH_TOKEN);
+//  Blynk.begin(BLYNK_AUTH_TOKEN);
    
   init_serial();
   connectWiFi();
@@ -150,7 +151,7 @@ void loop() {
   yield(); 
   
   // Jalankan program Blynk
-  Blynk.run();
+//  Blynk.run();
 
   // Jalankan program Button (Mode Standby)
   cek_button();
@@ -164,7 +165,7 @@ void loop() {
     previousMillis = currentMillis;
 
     // Kirim ke Server
-    sendToServer();
+    Serial.println(sendToServer());
   } 
 }
 
