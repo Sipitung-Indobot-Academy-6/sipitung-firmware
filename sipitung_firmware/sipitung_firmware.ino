@@ -10,8 +10,8 @@
 DFRobotDFPlayerMini player;
 
 // Set-up Pin (Gunakan define alih-alih const!)
-#define RX_DF 17
-#define TX_DF 16
+#define RX_DF 16
+#define TX_DF 17
 #define BUTTON_PIN 15
 #define TEMP_PIN 4
 
@@ -120,6 +120,7 @@ String sendToServer(){
     suhu = String(getSuhu());
     kelembapan = String(1);
     pelanggan = "B";
+    Serial.println(suhu);
 
     // Pengiriman Data via POST Method
     postData = "&status1=" + suhu + "&status2=" + kelembapan + "&pelanggan=" + pelanggan;
